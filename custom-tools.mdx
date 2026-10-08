@@ -1,0 +1,69 @@
+---
+title: "Custom tools"
+description: "Turn a page in your brain into a tool Claude can call."
+---
+
+Any page under a `tools/` folder becomes a tool in Claude's tool list, named `tool_<filename>`.
+`wiki/tools/standup-digest.md` becomes `tool_standup_digest`. You write one like any other page,
+usually by asking Claude to: "make a tool that digests this week's changes under a project."
+
+A custom tool is a saved procedure for your team: the instructions, the right search, or the
+right view, available to everyone who can open the brain without anyone pasting a prompt.
+
+## What a tool can do
+
+Custom tools are **read-only**. They can search, read and summarize the brain, never write to
+it, and they never run with more access than the person calling them. Arguments are substituted
+as data and never executed.
+
+There are three kinds:
+
+| Kind       | What it returns                                                                  |
+| ---------- | -------------------------------------------------------------------------------- |
+| **Prompt** | The page body, as instructions to the model. A saved skill.                      |
+| **Lookup** | One read (`search_pages`, `read_page`, `find_inbound_links` or `list_pages`), with its result appended under the body. |
+| **View**   | One [computed view](/computed-views), rendered. Add `widget` to open it in the app. |
+
+## Writing one
+
+The page's `description:` frontmatter becomes the tool's description, and the body around the
+fenced `tool` block is the instruction the model receives when the tool runs.
+
+````markdown
+---
+description: Summarize this week's changes under a project.
+---
+
+Group the results below by author and write a terse bulleted digest.
+
+```tool
+input: project (string) project folder, e.g. acme
+input: days (number, default=7) look-back window
+op: search_pages
+arg: prefix = projects/{{project}}/
+arg: query = {{project}}
+```
+````
+
+A prompt tool needs no fence at all, or a fence holding only `input:` lines.
+
+## Grammar
+
+The `tool` block is a few lines, not YAML:
+
+| Line                                                   | Meaning                                                                                 |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `input: <name> (<type>[, default=<v>][, optional]) <description>` | An argument. `<type>` is `string`, `number`, `boolean`, or `enum: a\|b\|c`. |
+| `op: <read>`                                           | The one read to run: `search_pages`, `read_page`, `find_inbound_links` or `list_pages`. |
+| `arg: <key> = <value>`                                 | An argument to that read. `{{name}}` inserts an input.                                  |
+| `view:`                                                | Everything after it is a computed-view directive.                                       |
+| `widget`                                               | Open the result in the app.                                                             |
+
+`op` and `view` cannot be combined. A brain can hold up to 25 tools. `validate` reports
+malformed tools, duplicates, and any past the limit.
+
+## When changes show up
+
+Claude fetches a connector's tool list once per connection. A **new, renamed or deleted** tool
+appears only after you reconnect: **Settings → Connectors → update tools**.
+Editing an **existing** tool's body takes effect on its next call, with no reconnect.

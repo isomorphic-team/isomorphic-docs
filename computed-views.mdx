@@ -1,0 +1,119 @@
+---
+title: "Computed views"
+description: "Listings, tables and counts that compute themselves from links and frontmatter."
+---
+
+A computed view is a fenced `okf-view` block in a page. Instead of a list you maintain by hand,
+it declares what to list, and Isomorphic computes it on every read. Add a customer page and
+every view that should include it does, with nobody updating an index.
+
+````markdown
+```okf-view
+kind: pages
+under: customers/
+filter: { stage: active }
+as: table
+columns: [title, owner, renewal]
+sort: renewal
+```
+````
+
+You rarely write one by hand. Ask Claude for "a table of active customers with owner and renewal
+date" and it writes the block.
+
+## How it renders
+
+- **In Claude and the app**, the view is always computed live from the brain's index.
+- **In the file**, Isomorphic also writes a snapshot of the result below the block, between
+  `okf-view:snapshot` comments, so github.com, Obsidian and other plain-markdown readers still
+  see a real table. The snapshot refreshes whenever the page is saved through Isomorphic, and can
+  go stale in between. Do not edit inside it; it is regenerated on save.
+- **A malformed block** renders a visible note saying what is wrong. A view never blocks a read
+  or a save.
+
+## Reference
+
+Every view picks a **source** with `kind` and a **rendering** with `as`.
+
+| Key        | Applies to       | Meaning                                                                                                                 |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `kind`     | all              | `backlinks`: pages linking to a page. `pages`: content pages. `folders`: the direct sub-folders of `under`. `count` is shorthand for `backlinks` with `as: count`. |
+| `of`       | `backlinks`      | The target page. Defaults to the page holding the view.                                                                  |
+| `under`    | `pages`, `folders` | A path prefix such as `customers/`, from the brain root or `./`-relative to this page. For `pages` the default is the whole brain; for `folders`, this page's own folder. |
+| `filter`   | all              | Frontmatter conditions. Every key must match one of its values, case-insensitively.                                      |
+| `as`       | all              | `list` (the default), `table`, or `count`.                                                                               |
+| `columns`  | `table`          | `title` (linked) plus any frontmatter keys, as a bracketed list: `[title, owner]`.                                       |
+| `describe` | `list`           | A frontmatter key shown beside each item.                                                                               |
+| `group-by` | all              | A frontmatter key. Lists and tables get a section per value; a count gets a tally per value.                             |
+| `sort`     | `list`, `table`  | `title` (the default) or any frontmatter key. Numbers sort as numbers.                                                   |
+| `order`    | `list`, `table`  | `asc` (the default) or `desc`.                                                                                           |
+| `label`    | `count`          | Text after the number, such as `tracked contacts`.                                                                       |
+
+`filter` takes an inline map or one indented level, and a value can be a list:
+
+````markdown
+```okf-view
+kind: pages
+filter:
+  type: Contact
+  stage: [lead, active]
+```
+````
+
+Filters, grouping and columns read flat frontmatter keys only. Nested frontmatter is not
+indexed, so a view cannot see inside it.
+
+## Examples
+
+**How many pages link here.** On a person's page, the number of meetings that mention them:
+
+````markdown
+```okf-view
+kind: count
+filter: { type: Meeting Note }
+label: meetings
+```
+````
+
+**Everything that links here, as a table.** On a project page:
+
+````markdown
+```okf-view
+kind: backlinks
+as: table
+columns: [title, type, updated]
+sort: updated
+order: desc
+```
+````
+
+**A directory, grouped.** On `people/index.md`:
+
+````markdown
+```okf-view
+kind: pages
+under: people/
+group-by: team
+describe: role
+```
+````
+
+**A count per value.** Customers per stage:
+
+````markdown
+```okf-view
+kind: pages
+under: customers/
+as: count
+group-by: stage
+label: customers
+```
+````
+
+**Sub-folders.** On a folder note, one entry per sub-folder, linked through its own folder note:
+
+````markdown
+```okf-view
+kind: folders
+```
+````

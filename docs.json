@@ -26,16 +26,42 @@
   "navigation": {
     "groups": [
       {
-        "group": "Using Isomorphic",
-        "pages": ["index", "getting-started"]
+        "group": "Get started",
+        "pages": [
+          "index",
+          "getting-started"
+        ]
+      },
+      {
+        "group": "Using your brain",
+        "pages": [
+          "writing-a-brain",
+          "the-app",
+          "computed-views",
+          "custom-tools",
+          "importing-records"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          "tools",
+          "permissions"
+        ]
       },
       {
         "group": "Running it",
-        "pages": ["self-hosting", "architecture"]
+        "pages": [
+          "self-hosting",
+          "architecture"
+        ]
       },
       {
         "group": "Project",
-        "pages": ["building-with-claude", "licensing"]
+        "pages": [
+          "building-with-claude",
+          "licensing"
+        ]
       }
     ]
   },
@@ -53,7 +79,15 @@
     }
   },
   "contextual": {
-    "options": ["copy", "view", "claude", "chatgpt", "mcp", "cursor", "vscode"]
+    "options": [
+      "copy",
+      "view",
+      "claude",
+      "chatgpt",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {

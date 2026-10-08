@@ -1,0 +1,53 @@
+---
+title: "Importing records"
+description: "Sync a spreadsheet or CRM into your brain without clobbering what people wrote."
+---
+
+`sync_records` brings keyed records from an outside source, such as a contacts spreadsheet or a
+CRM export, into the brain as pages. It is built to be run again and again: each run updates
+what the source owns and leaves everything people wrote alone.
+
+In practice you hand Claude the file and say what it is: "import this contacts sheet into
+`people/`, keyed by email; the sheet owns name, email and company."
+
+## The guarantees
+
+1. **Human edits are never overwritten.** An import writes only the frontmatter keys you
+   declare as source-owned. The page body is written once, when the page is created, and never
+   again. Fields people added are untouched.
+2. **Nothing is deleted.** When a record disappears from the source, the import proposes the
+   deletion and waits for a person to decide.
+3. **Nothing comes back from the dead.** If someone deletes a page an import created, the next
+   run asks rather than recreating it.
+4. **Re-running is safe.** An import with no changes makes no commit.
+
+Pages are matched to records by key, stored on the page as `source_key`, so a page can be moved
+or renamed and the next run still finds it.
+
+## How a run works
+
+| Argument         | Meaning                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `source`         | A stable id for the feed, such as `contacts-spreadsheet`. Each source keeps its own history.                 |
+| `records`        | Up to 200 records per call, each with a `key`, its `fields`, and optionally a `path` and `body` for first creation. |
+| `source_owned`   | The frontmatter keys the source may update, such as `["title", "email"]`.                                   |
+| `manifest`       | The source's complete list of keys. Pass it on the final batch to detect records that have gone missing.     |
+| `adopt_existing` | Bind records to pages that already exist at their paths, for a brain that predates the import.               |
+| `dry_run`        | Report what would change, and change nothing.                                                                |
+
+A larger source goes in batches. Every batch lands as one commit (or one pull request on a
+protected branch), along with the import's history file at `.isomorphic/imports/<source>.json`.
+
+## Answering import questions
+
+Anything an import cannot decide alone (a proposed deletion, a key whose page a person removed)
+becomes a finding that `validate` keeps listing until someone answers it. Answer with `resolve`:
+
+| Action     | Effect                                                                  |
+| ---------- | ----------------------------------------------------------------------- |
+| `delete`   | Delete the page a proposed deletion pointed at.                         |
+| `alias`    | Bind the key to a surviving page, for example after merging duplicates. |
+| `suppress` | Never import this key again.                                            |
+| `recreate` | Forget the key, so the next run creates its page fresh.                 |
+
+Importing needs the **editor** role on the brain.

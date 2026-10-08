@@ -1,0 +1,144 @@
+---
+title: "Writing a brain"
+description: "How a brain is laid out, what a good page looks like, and how to keep it in shape."
+---
+
+A brain is an ordinary git repository of markdown. There are no fixed folders and no entity
+types to register. What it does have is a few conventions, from the
+[Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
+(OKF), that make it searchable, linkable and readable by any tool. Claude follows them when it
+writes; this page is for when you write, or want to know why a page came out the way it did.
+
+A new brain ships with an `AGENTS.md` at its root that states the same conventions for agents.
+Edit it to add rules of your own.
+
+## Layout
+
+| Path          | Holds                                                                                                            |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `wiki/`       | The knowledge itself, maintained by people and agents. Any folder structure you like.                            |
+| `source/`     | Immutable source material: transcripts, emails, documents. Read by agents, never modified by them.               |
+| `wiki/log.md` | An append-only changelog of every create, update, move and delete. Maintained automatically; do not edit it.     |
+| `AGENTS.md`   | The conventions for this brain.                                                                                  |
+
+An adopted repository can keep its own layout. `configure_brain` tells Isomorphic where the
+content lives, for example a repository whose markdown sits under `docs/`.
+
+## One page, one concept
+
+Folders are free. Granularity is not. Anything another page should be able to link to gets its
+own file: a person, a vendor, a system, a project, a decision.
+
+The test: once written, can something link to it? Can search return it? Can a view filter on
+it? If not, it needs its own page. If you are about to write a list of named things as headings
+inside one page, write a page per thing and link to them from the parent instead.
+
+A **concept** is the recurring, named thing ("Annual Meeting", the series). A **record** is a
+dated instance of it ("16th Annual Meeting, March 2026"), and lives inside the concept's page,
+under `source/`, or in an [imported dataset](/importing-records).
+
+**Match what is already there.** Before adding to a folder, read a sibling page and follow it:
+the same `type:` values, the same frontmatter keys, the same granularity.
+
+## Frontmatter
+
+Every key but one is optional. A common shape:
+
+```yaml
+---
+type: Customer
+title: Acme Corp
+description: Rocket-parts customer, mid-market, US west
+updated: 2026-07-06
+sources:
+  - source/2026-04-26-acme-pricing.md
+---
+```
+
+- **`type:`** is the one field OKF requires. It is a short, free-form noun (`Customer`,
+  `Vendor`, `Meeting Note`), not a fixed taxonomy. Reuse the types the brain already uses and
+  coin a new one when nothing fits. If you cannot say what type a thing is, it probably belongs
+  inside another page.
+- **`updated:`** is bumped automatically on every save through Isomorphic.
+- **`status:`** is optional: `draft`, `stable` (the default when absent), or `deprecated` for a
+  page kept for links and history but no longer current.
+- **Anything else is yours.** `owner`, `due`, `stage`, `client`: every flat key is indexed, so
+  it is immediately usable in a [computed view's](/computed-views) `filter:` and `group-by:`.
+
+Nested frontmatter, such as OKF provenance blocks, is preserved byte for byte on every save but
+is not indexed. Write the keys you want to filter on flat.
+
+To change a field without touching the page body, ask Claude to set it. `write_page` takes a
+`fields` argument for exactly this, so it never has to rewrite the page to mark something done.
+
+## Page names and links
+
+A page's name is its `title:` if it has one, otherwise its first `# H1`, otherwise its filename.
+Two pages with the same title make a link to that title ambiguous; `validate` reports them.
+
+Both link styles work:
+
+- **Markdown links**, such as `[Acme](customers/acme.md)`. This is what any OKF reader follows,
+  so prefer it for anything meant to travel.
+- **Wikilinks**, such as `[[Acme Corp]]`, matched against a page's path, filename or title,
+  ignoring case and punctuation. `[[Acme Corp#Pricing]]` links to a heading. Wikilinks are an
+  Isomorphic convenience, not part of OKF.
+
+Moving or deleting a page through Isomorphic repoints or reports every link to it, in both
+styles, in the same commit.
+
+## Folder notes
+
+A folder's overview page is named `index.md` (`README.md` is accepted for vaults that already
+use it). A page at `<folder>/index.md` **is** that folder: clicking the folder in the app opens
+it. Any other name is just a loose page next to its siblings.
+
+A folder note is a good home for a directory listing that keeps itself current:
+
+````markdown
+```okf-view
+kind: pages
+under: vendors/
+as: table
+columns: [title, description]
+```
+````
+
+See [Computed views](/computed-views) for the full syntax.
+
+## Images and PDFs
+
+Attachments are stored in the brain beside the pages that use them, in an `assets/` folder, and
+embedded as ordinary relative image links. PNG, JPEG, GIF, WebP, SVG and PDF are accepted, up to
+5 MB each.
+
+- **In the app**, paste or drop a file into the editor.
+- **Through Claude**, give it a public `https` URL and ask it to attach the file. Claude cannot
+  pass an image you attached to the chat into a tool call, so for those, drop the file into the
+  Isomorphic panel instead.
+
+Moving a folder moves its `assets/` with it, so image links keep working in any markdown reader.
+
+## Keeping it in shape
+
+Ask Claude to **validate** the brain after a big restructure. It reports two kinds of thing:
+
+- **Broken links**, which are always defects and always reported. Fix them.
+- **Findings**, which are advisory: a page nothing links to, a folder note that lists none of
+  its pages, two pages telling the same story, pages missing a `type:`, two pages answering to
+  one name. Each carries a `[key]`.
+
+Work through findings one at a time. When one is deliberate, have Claude **resolve** it with
+`dismiss` and a reason; the decision is recorded in the brain and the finding is not raised
+again. Dismissing never edits a page.
+
+To check that a page is findable, ask Claude to search for a question the page should answer
+and pass the page's path as `expect`. The result says where the page ranked and what outranked
+it.
+
+## Privacy
+
+Access is granted per brain, not per folder. Anyone who can open a brain can read every page and
+file in it, including anything under a folder named `private/`. Material only some people should
+see belongs in a separate brain shared with just those people. See
+[Roles and sharing](/permissions).

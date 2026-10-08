@@ -1,0 +1,78 @@
+---
+title: "Tool reference"
+description: "Every tool the Isomorphic MCP server offers, grouped by what it is for."
+---
+
+You rarely call these by name: ask Claude in plain language and it picks the tool. This page is
+for knowing what is possible, and for reading tool calls when something looks wrong. The role
+each tool needs is in [Roles and sharing](/permissions).
+
+Every tool takes an optional `brain` argument, so a single request can reach a brain other than
+the active one.
+
+## Read and search
+
+| Tool                 | What it does                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `search_pages`       | Ranked full-text search. A question-shaped query still finds the page that answers part of it, and the response says which terms it used. |
+| `read_page`          | A page's raw markdown, for Claude to reason over.                                                              |
+| `view_page`          | Opens a page in [the app](/the-app) for you to see, with its web address.                                      |
+| `list_pages`         | The tree of pages.                                                                                             |
+| `browse_brain`       | Opens the whole brain in the app, with a summary of its shape.                                                 |
+| `find_inbound_links` | Every page linking to a page, in both link styles.                                                             |
+| `view_graph`         | The link graph, optionally focused on one page.                                                                |
+| `view_activity`      | Who changed what and when, for the brain or one page, including edits made outside Isomorphic.                 |
+| `validate`           | Broken links, plus advisory findings. See [Keeping it in shape](/writing-a-brain#keeping-it-in-shape).          |
+| `resolve`            | Records a decision on a finding so it stops being reported.                                                    |
+| `whoami`             | Who the server thinks you are, in which organization, at which roles.                                          |
+
+Reads come from an index that checks the repository first, so an edit made on github.com, by
+another agent, or by a merged pull request is never served stale.
+
+## Write
+
+| Tool               | What it does                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `write_page`       | Creates or updates a page. Replace the body, apply exact find-and-replace edits, append, or set frontmatter fields without touching the body. An edit that does not match exactly once aborts the whole call. |
+| `move_page`        | Moves or renames a page or folder, repointing every link to it in the same commit.                             |
+| `delete_page`      | Deletes a page or folder, and reports what still links to it.                                                  |
+| `edit_page`        | Opens a page in the editor, for you to change by hand.                                                         |
+| `attach_media`     | Stores an image or PDF in the brain, from a public URL or an upload, optionally embedded in a page.            |
+| `read_media`       | Returns a stored image so Claude can see it.                                                                   |
+| `sync_records`     | Imports keyed records from a spreadsheet or CRM. See [Importing records](/importing-records).                  |
+| `configure_brain`  | Tells Isomorphic where content lives in an adopted repository, and which frontmatter keys to index.            |
+
+Every write is one atomic commit, or a pull request when the branch is protected. A retry of an
+identical write within ten minutes, the kind a client sends after a timeout, is answered without
+being applied twice.
+
+## Brains
+
+| Tool               | What it does                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `brains`           | The brains you can reach.                                                                      |
+| `switch_brain`     | Sets the brain later requests use.                                                             |
+| `create_brain`     | Creates a new brain and switches to it.                                                        |
+| `connect_brain`    | Adopts an existing repository of markdown as a brain, or moves a brain to another organization after previewing whose access changes. |
+| `disconnect_brain` | Removes a brain from the organization. The repository itself is untouched.                     |
+
+## Organization
+
+| Tool                                                   | What it does                                                                     |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `members`                                              | The organization's roster.                                                       |
+| `invite_member`, `set_member_role`, `remove_member`    | Email invitations and org roles.                                                 |
+| `brain_access`, `share_brain`                          | Who can open a brain and at what level; grant, change or revoke access, and make a brain private or org-visible. |
+| `create_org`                                           | Starts a new organization.                                                       |
+| `connected_accounts`, `link_identity`, `unlink_identity` | Several email addresses, one person, one set of brains.                        |
+| `analytics`                                            | Whether the organization is using its brains. Counted in the deployment's own database and never sent anywhere. |
+| `submit_feedback`                                      | Files a bug or idea on the project's tracker, showing you the exact text first and publishing nothing that identifies you. |
+
+Organization tools appear only on deployments where people sign in. A single-user deployment
+does not offer them. Some, such as `analytics` and `submit_feedback`, also depend on how the
+server is configured.
+
+## Your brain's own tools
+
+Pages under a `tools/` folder add tools named `tool_<filename>`. See
+[Custom tools](/custom-tools).

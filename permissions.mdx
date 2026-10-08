@@ -1,0 +1,70 @@
+---
+title: "Roles and sharing"
+description: "Organizations, brain roles, guests, and who can do what."
+---
+
+People belong to an **organization**, and an organization holds **brains**. Access is decided
+at two levels, deliberately kept apart: "can you manage this organization's people?" and "can
+you write in this brain?" are different questions.
+
+## Roles
+
+Four roles, in order: **`viewer` < `editor` < `admin` < `owner`**.
+
+- **Your org role** comes from membership in the organization. It governs people and which
+  brains exist.
+- **Your brain role** is what you can do inside one brain. It is the highest of:
+  - your org role, if the brain is visible to the whole organization;
+  - a role the brain was explicitly shared with you at;
+  - **admin**, if you are an admin or owner of the organization, so a brain never ends up with
+    nobody able to manage it.
+
+A share can only raise your access, never lower it.
+
+## Who can do what
+
+| Action                                                                | Needs                 |
+| --------------------------------------------------------------------- | --------------------- |
+| Read, search, browse, graph, activity, validate, custom tools         | brain **viewer**      |
+| Write, move and delete pages; attach media; import; resolve findings  | brain **editor**      |
+| Configure the brain; share it; make it private or org-visible         | brain **admin**       |
+| Create a brain                                                        | org **editor**        |
+| Connect or disconnect a repository; move a brain to another org       | org **admin**         |
+| Create an organization                                                | any signed-in account |
+| Invite people, change roles, remove members                           | org **admin**         |
+| Analytics totals and the per-brain table                              | org **viewer**        |
+| Analytics per-person table                                            | org **admin**         |
+
+## Sharing a brain
+
+A new brain is **private** to whoever created or connected it. Making it visible to the whole
+organization is one request: "share this brain with the org."
+
+- You can share a brain with a person at any role up to your own, and never remove your own
+  access.
+- **Guests.** A brain can be shared with someone outside its organization. They can reach that
+  one brain and nothing else, at **editor** at most.
+- Sharing with an email address that has no account yet records an invitation, which becomes
+  the share when they first sign in. Nobody needs a GitHub account.
+- Access is per brain, not per folder. To keep material from some people, put it in a separate
+  brain.
+
+## Members
+
+Admins manage the roster from the app or by asking Claude: invite someone by email address, change a role,
+remove someone. The **owner** role cannot be assigned, changed or removed, and nobody can edit
+their own membership, so an organization can never lock itself out.
+
+One person can link several email addresses to a single identity, so signing in with any of
+them reaches the same brains.
+
+## Protected branches
+
+If a brain's default branch is protected on GitHub, every change, at any role, opens a pull
+request instead of committing directly. It reaches the brain when the pull request merges.
+
+## Single-user setups
+
+A [self-hosted](/self-hosting) instance with one shared token, and the local `pnpm try`
+runtime, have no organization model. Every caller is `owner`, and the member and sharing tools
+are not offered at all.
