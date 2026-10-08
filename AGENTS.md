@@ -1,33 +1,39 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# Isomorphic docs: agent instructions
 
-# Documentation project instructions
+The public documentation site for Isomorphic, on [Mintlify](https://mintlify.com). Pages are
+MDX with YAML frontmatter, configuration is `docs.json`, and every push to `main` deploys. For
+Mintlify product knowledge (components, configuration), use the Mintlify docs MCP server at
+`https://www.mintlify.com/docs/mcp`.
 
-## About this project
+## Where the truth lives
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+The product is `isomorphic-team/isomorphic-app`. These pages describe its behavior, so when a
+page and the code disagree, the code wins and the page needs fixing. Link to a file in that
+repository with a full GitHub URL (`https://github.com/isomorphic-team/isomorphic-app/blob/main/<path>`),
+never a relative path, since the file is not in this repo.
 
 ## Terminology
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- **Brain**: a git repository of markdown that holds a person's or team's knowledge. Not
+  "wiki", "vault", or "workspace".
+- **Organization** (or **org**): who owns brains and members. Roles are `viewer < editor <
+  admin < owner`, and brain roles are separate from org roles.
+- **The app**: the viewer and editor, rendered in the conversation as an MCP App or in a browser
+  tab. Not "the widget" in prose.
+- **OKF**: the Open Knowledge Format, the markdown conventions a brain follows.
+- Tool names are code: `write_page`, `view_page`.
 
-## Style preferences
+## Style
 
-{/* Add any project-specific style rules below */}
-
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
+- Plain, specific, second person. Say what happens and why, with the command or file name.
+- No em-dashes. Use a comma, a period, parentheses, or a colon.
+- Sentence case headings. Code formatting for commands, paths, env vars, and tool names.
+- Escape `<` and `{` in prose (`&lt;`, `\{`), or keep them inside backticks; MDX parses them
+  as JSX otherwise. Placeholders such as `<your-worker>` belong in code spans.
+- Check with `mint broken-links` before pushing.
 
 ## Content boundaries
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+Public, user- and self-hoster-facing material only. Design docs, operator runbooks (`docs/ops/`),
+and the roadmap stay in `isomorphic-app`; link to them on GitHub where a page needs them, and do
+not copy them here.

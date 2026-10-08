@@ -1,55 +1,34 @@
-# Mintlify Starter Kit
+# Isomorphic docs
 
-Use the starter kit to get your docs deployed and ready to customize.
+The public documentation for [Isomorphic](https://isomorphic.sh), built with
+[Mintlify](https://mintlify.com). The product's code lives in
+[isomorphic-team/isomorphic-app](https://github.com/isomorphic-team/isomorphic-app).
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Run it locally
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
-
-## AI-assisted writing
-
-Set up your AI coding tool to work with Mintlify:
-
-```bash
-npx skills add https://mintlify.com/docs
-```
-
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
-
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
-
-```
+```sh
 npm i -g mint
+mint dev            # http://localhost:3000
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+The Mintlify CLI refuses Node 25 and newer. On a machine without an LTS Node, run it through a
+temporary Node 22:
 
+```sh
+npx -y node@22 "$(readlink -f "$(which mint)")" dev
 ```
-mint dev
-```
 
-View your local preview at `http://localhost:3000`.
+`mint broken-links` checks every internal link. Run it before pushing.
 
-## Publishing changes
+## Publishing
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+The Mintlify GitHub app deploys every push to `main`. A merge is a release.
 
-## Need help?
+## Layout
 
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+| File                   | Holds                                                   |
+| ---------------------- | ------------------------------------------------------- |
+| `docs.json`            | Navigation, branding, navbar, footer                    |
+| `*.mdx`                | One page each; `title` and `description` in frontmatter |
+| `images/`              | Screenshots, referenced as `/images/<name>.png`         |
+| `logo/`, `favicon.svg` | The mark, matching `isomorphic.sh`                      |

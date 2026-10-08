@@ -1,20 +1,90 @@
 ---
 title: "Introduction"
-description: "Welcome to your project"
+description: "A team knowledge base that lives in a GitHub repository, and that Claude, or any MCP client, can search, read, edit, and render as an interactive app inside the conversation."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+Your knowledge is markdown in a git repo you own. Isomorphic is the layer that lets an LLM
+maintain it: a Model Context Protocol server with a librarian's toolkit, a content index that
+keeps reads fast at any size, computed views, and an in-client viewer and WYSIWYG editor so a
+non-technical teammate never has to open GitHub.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<Frame caption="The page viewer: frontmatter as properties, a table and count computed from the pages that link here, and the linked references below.">
+  <img src="/images/viewer.png" alt="The Isomorphic page viewer" />
+</Frame>
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Getting started" icon="plug" href="/getting-started">
+    Connect Claude to the hosted service and create your first brain.
+  </Card>
+  <Card title="Self-hosting" icon="server" href="/self-hosting">
+    Run it yourself, from a folder on your laptop to a multi-tenant deployment.
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    How a tool call travels through the system, file by file.
+  </Card>
+  <Card title="Building with Claude Code" icon="code" href="/building-with-claude">
+    The setup that lets Claude Code write most of this codebase.
+  </Card>
+</CardGroup>
+
+## Try it in two minutes, with no accounts
+
+```sh
+git clone https://github.com/isomorphic-team/isomorphic-app
+cd isomorphic-app && pnpm install
+pnpm try ~/Documents/notes     # any folder of markdown; an Obsidian vault works
+```
+
+The real MCP server, the real librarian tools, and the real content index, against a git
+repository on your disk. No GitHub account, no Cloudflare account, no tokens. Connect it
+with `claude mcp add --transport http isomorphic-local http://127.0.0.1:8788/mcp`, or open
+`http://127.0.0.1:8788/b/local/notes` in a browser for the same viewer and editor with no
+MCP host at all.
+
+## Why not a folder of markdown and a coding agent?
+
+You can point Claude Code at a folder of notes today, and for one person that is a fine place
+to start. Isomorphic is for what goes wrong after that:
+
+- **Moving a page breaks every link to it.** `move_page` repoints each inbound link, markdown
+  and wikilink alike, in the same commit. `delete_page` tells you what still points at the page.
+- **An agent rewrites a whole page to change one paragraph.** `write_page` takes exact
+  find-and-replace edits and appends. An anchor that matches zero or several times aborts the
+  whole call, so a batch is never half-applied and a page is never silently clobbered.
+- **Reads stop scaling.** A derived content index keeps search, backlinks, validation, and the
+  graph to one or two queries on a 3,000-page brain, and checks the branch HEAD on every read so
+  an edit made on github.com or by another agent is never served stale.
+- **Listings drift.** A fenced `okf-view` block is a listing, table, or count computed from
+  backlinks or frontmatter, recomputed on every read instead of maintained by hand.
+- **Half the team will never open a terminal or GitHub.** The viewer and editor render inside
+  the conversation and in a browser tab. Teammates sign in with an email link, nobody needs a
+  GitHub account, and orgs, roles, invitations, and per-brain sharing are all built in.
+
+## What works where
+
+The server never calls a model. It is an MCP server; the client brings the model, and any
+client that speaks the protocol works.
+
+| Surface | Works with |
+| --- | --- |
+| **The tools:** search, read, write, move, validate, computed views, import, brain-authored tools | Any MCP client over Streamable HTTP, with OAuth 2.1 or a bearer token: claude.ai, Claude Code, Claude Desktop, the MCP Inspector, and anything else that speaks MCP. |
+| **The in-conversation app:** viewer, WYSIWYG editor, file tree, graph, activity, roster | Hosts that implement the [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview) extension. claude.ai renders it, and so do the MCP Inspector and VS Code Copilot. In a host without it the tools still work and return text. |
+| **The same app in a browser tab** | Any browser, no MCP host: `/b/<owner>/<repo>/<path>` on a multi-tenant deployment, signed in with the same email link, and `/b/local/<folder>` from `pnpm try`. |
+| **Reading and editing the brain itself** | Anything that reads markdown: github.com, Obsidian, `grep`, a pull request. The brain is a plain git repository and needs none of this software. |
+
+## Why this exists
+
+Writing knowledge down is a separate job from doing the work, which is why it does not get
+done. LLMs are good at that separate job and bad at doing it into a database whose shape they
+cannot see.
+
+So the substrate is one markdown file per concept, in a normal git repository, in the
+[Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md).
+You can read it on github.com, edit it in Obsidian, grep it, diff it, and review a change in a
+pull request. If you stop using Isomorphic tomorrow you still have everything.
+
+<Note>
+  Open source under [AGPL-3.0-only](/licensing). Run it, fork it, deploy it for your own company,
+  sell services around it. If you modify it and let others use your version over a network, you
+  owe those users your changes. Your knowledge base is your data and the license does not reach it.
+</Note>
