@@ -64,6 +64,7 @@ sources:
   page kept for links and history but no longer current.
 - **Anything else is yours.** `owner`, `due`, `stage`, `client`: every flat key is indexed, so
   it is immediately usable in a [computed view's](/computed-views) `filter:` and `group-by:`.
+  Write dates as `YYYY-MM-DD` so views can compare them (`due: "< today"`).
 
 Nested frontmatter, such as OKF provenance blocks, is preserved byte for byte on every save but
 is not indexed. Write the keys you want to filter on flat.
@@ -100,7 +101,7 @@ A folder note is a good home for a directory listing that keeps itself current:
 kind: pages
 under: vendors/
 as: table
-columns: [title, description]
+columns: title, description
 ```
 ````
 

@@ -60,8 +60,10 @@ them reaches the same brains.
 
 ## Protected branches
 
-If a brain's default branch is protected on GitHub, every change, at any role, opens a pull
-request instead of committing directly. It reaches the brain when the pull request merges.
+If a brain's default branch is protected on GitHub, changes go through a pull request instead
+of committing directly, at any role. The first change opens one, and later changes join that
+same pull request until it merges. Reads, search and views show the default branch, so a change
+appears there once the pull request merges.
 
 ## Single-user setups
 

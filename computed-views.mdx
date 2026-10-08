@@ -40,30 +40,71 @@ Every view picks a **source** with `kind` and a **rendering** with `as`.
 | `kind`     | all              | `backlinks`: pages linking to a page. `pages`: content pages. `folders`: the direct sub-folders of `under`. `count` is shorthand for `backlinks` with `as: count`. |
 | `of`       | `backlinks`      | The target page. Defaults to the page holding the view.                                                                  |
 | `under`    | `pages`, `folders` | A path prefix such as `customers/`, from the brain root or `./`-relative to this page. For `pages` the default is the whole brain; for `folders`, this page's own folder. |
-| `filter`   | all              | Frontmatter conditions. Every key must match one of its values, case-insensitively.                                      |
+| `filter`   | all              | Frontmatter conditions, all of which must hold. See [Filters](#filters).                                                 |
 | `as`       | all              | `list` (the default), `table`, or `count`.                                                                               |
-| `columns`  | `table`          | `title` (linked) plus any frontmatter keys, as a bracketed list: `[title, owner]`.                                       |
+| `columns`  | `table`          | `title` (linked) plus any frontmatter keys: `title, owner` or `[title, owner]`.                                           |
 | `describe` | `list`           | A frontmatter key shown beside each item.                                                                               |
-| `group-by` | all              | A frontmatter key. Lists and tables get a section per value; a count gets a tally per value.                             |
+| `group-by` | all              | A frontmatter key. Lists and tables get a section per value; a count gets a tally per value. Groups are alphabetical, with "(none)" last, unless the filter lists the key's values, which then set the order. |
 | `sort`     | `list`, `table`  | `title` (the default) or any frontmatter key. Numbers sort as numbers.                                                   |
 | `order`    | `list`, `table`  | `asc` (the default) or `desc`.                                                                                           |
 | `label`    | `count`          | Text after the number, such as `tracked contacts`.                                                                       |
 
-`filter` takes an inline map or one indented level, and a value can be a list:
+## Filters
+
+`filter` takes an inline map (`filter: { type: Contact }`) or one indented level. A value is a
+match unless it starts with an operator:
+
+| Value                      | Matches pages where the key                                      |
+| -------------------------- | ---------------------------------------------------------------- |
+| `Contact`                  | equals `Contact`, ignoring case                                  |
+| `[lead, active]`           | equals any of the listed values                                  |
+| `"< today"`, `"<= -30d"`   | is a date before today, or at least 30 days ago                  |
+| `">= 10000"`               | is a number of at least 10,000                                   |
+| `"!= lost"`                | is anything but `lost`                                           |
+
+`<`, `<=`, `>` and `>=` compare numbers and `YYYY-MM-DD` dates. Besides a number or a date, they
+take `today` or a day offset such as `-30d` or `+7d` (in UTC). `!=` also takes text. A page
+missing the key, or holding a value that is not a number or date, never matches an operator,
+`!=` included. List-valued frontmatter matches if any element does.
 
 ````markdown
 ```okf-view
 kind: pages
+under: deals/
 filter:
-  type: Contact
-  stage: [lead, active]
+  stage: [lead, qualified, proposal]
+  value: ">= 10000"
+as: table
+columns: title, stage, value, next_step_due
+group-by: stage
 ```
 ````
 
 Filters, grouping and columns read flat frontmatter keys only. Nested frontmatter is not
 indexed, so a view cannot see inside it.
 
+## Readable tables
+
+Column headers and group headings are made readable, so `next_step_due` shows as "Next step
+due". In Claude and the app, a `YYYY-MM-DD` date shows relative to today ("Oct 16 · in 12
+days"), and under a key named `due` or ending in `_due` or `_due_date`, a past date shows as
+"N days overdue". The snapshot written to the file keeps the raw date, so a saved page does not
+change from one day to the next.
+
 ## Examples
+
+**What is overdue.** Tasks past their due date:
+
+````markdown
+```okf-view
+kind: pages
+under: tasks/
+filter: { due: "< today" }
+as: table
+columns: title, owner, due
+sort: due
+```
+````
 
 **How many pages link here.** On a person's page, the number of meetings that mention them:
 

@@ -42,7 +42,7 @@ another agent, or by a merged pull request is never served stale.
 | `sync_records`     | Imports keyed records from a spreadsheet or CRM. See [Importing records](/importing-records).                  |
 | `configure_brain`  | Tells Isomorphic where content lives in an adopted repository, and which frontmatter keys to index.            |
 
-Every write is one atomic commit, or a pull request when the branch is protected. A retry of an
+Every write is one atomic commit. When the branch is protected, writes collect in one open pull request instead. A retry of an
 identical write within ten minutes, the kind a client sends after a timeout, is answered without
 being applied twice.
 
